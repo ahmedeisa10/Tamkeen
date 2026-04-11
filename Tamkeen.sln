@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tamkeen.Domain", "Tamkeen.D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tamkeen.Application", "Tamkeen.Application\Tamkeen.Application.csproj", "{0C3E4911-BC58-42B8-A93F-04AE50E8D473}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{3F6F73E9-AE16-4B6A-8372-CEFD2E541C4D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tamkeen.Infrastructure", "Infrastructure\Tamkeen.Infrastructure.csproj", "{3F6F73E9-AE16-4B6A-8372-CEFD2E541C4D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tamkeen.API", "Tamkeen.API\Tamkeen.API.csproj", "{8B0974CE-E12A-4D7E-89C5-2F158B5B7069}"
 EndProject
