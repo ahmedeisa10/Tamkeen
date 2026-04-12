@@ -49,7 +49,7 @@ namespace Tamkeen.Infrastructure.Implementation.Auth
                 return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
 
             // default role = Tenant
-            await _userManager.AddToRoleAsync(user, UserRole.Tenant.ToString());
+            await _userManager.AddToRoleAsync(user, UserRole.Manager.ToString());
 
             await _emailService.SendConfirmationEmail(dto.Email, code);
 
