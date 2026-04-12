@@ -1,3 +1,6 @@
+using Tamkeen.Application.DependencyInjection;
+using Tamkeen.Infrastructure.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +8,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("default", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -13,7 +28,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-// I Love Nada
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -21,5 +36,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-//nosir elbezzzz
-//nosir bezz elkalb

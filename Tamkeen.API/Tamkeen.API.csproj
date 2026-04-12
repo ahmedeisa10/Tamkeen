@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Infrastructure\Tamkeen.Infrastructure.csproj" />
     <ProjectReference Include="..\Tamkeen.Application\Tamkeen.Application.csproj" />
   </ItemGroup>
 
