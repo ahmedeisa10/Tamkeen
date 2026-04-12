@@ -13,7 +13,7 @@ namespace Tamkeen.Application.DependencyInjection
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
             // AutoMapper
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
 
             // FluentValidation
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

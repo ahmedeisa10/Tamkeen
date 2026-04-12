@@ -1,19 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tamkeen.Application.DTOs.Ticket_DTOs;
-using Tamkeen.Infrastructure.Services;
-using SendGrid.Helpers.Errors.Model;
-using Tamkeen.Domain.Entities;
-using Tamkeen.Domain.Enums;
 using Tamkeen.Application.Interfaces.Ticket_Interface;
 
 namespace Tamkeen.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    
     public class TicketsController : ControllerBase
     {
         private readonly ITicketService _ticketService;
@@ -47,7 +42,7 @@ namespace Tamkeen.API.Controllers
 
         // POST /api/tickets
         [HttpPost]
-        [Authorize(Roles = "Tenant")]
+        //[Authorize(Roles = "Tenant")]
         public async Task<IActionResult> Create([FromForm] CreateTicketDto dto)
         {
             var ticket = await _ticketService.CreateAsync(dto, GetUserId());
@@ -55,7 +50,7 @@ namespace Tamkeen.API.Controllers
         }
 
         [HttpPatch("{id}/assign")]
-        [Authorize(Roles = "Manager")]
+        //[Authorize(Roles = "Manager")]
         public async Task<IActionResult> AssignVendor(Guid id, [FromBody] AssignTicketDto dto)
         {
             await _ticketService.AssignVendorAsync(id, dto);
@@ -64,7 +59,7 @@ namespace Tamkeen.API.Controllers
 
         // PATCH /api/tickets/{id}/accept
         [HttpPatch("{id}/accept")]
-        [Authorize(Roles = "Vendor")]
+        //[Authorize(Roles = "Vendor")]
         public async Task<IActionResult> Accept(Guid id)
         {
             await _ticketService.AcceptAsync(id, GetUserId());
@@ -73,7 +68,7 @@ namespace Tamkeen.API.Controllers
 
         // PATCH /api/tickets/{id}/reject
         [HttpPatch("{id}/reject")]
-        [Authorize(Roles = "Vendor")]
+        //[Authorize(Roles = "Vendor")]
         public async Task<IActionResult> Reject(Guid id)
         {
             await _ticketService.RejectAsync(id, GetUserId());
@@ -82,7 +77,7 @@ namespace Tamkeen.API.Controllers
 
         // PATCH /api/tickets/{id}/complete
         [HttpPatch("{id}/complete")]
-        [Authorize(Roles = "Vendor")]
+        //[Authorize(Roles = "Vendor")]
         public async Task<IActionResult> Complete(Guid id)
         {
             await _ticketService.CompleteAsync(id, GetUserId());
@@ -91,7 +86,7 @@ namespace Tamkeen.API.Controllers
 
         // PATCH /api/tickets/{id}/close
         [HttpPatch("{id}/close")]
-        [Authorize(Roles = "Tenant")]
+        //[Authorize(Roles = "Tenant")]
         public async Task<IActionResult> Close(Guid id)
         {
             await _ticketService.CloseAsync(id, GetUserId());
@@ -101,7 +96,7 @@ namespace Tamkeen.API.Controllers
 
         // POST /api/tickets/{id}/images
         [HttpPost("{id}/images")]
-        [Authorize(Roles = "Vendor")] //Vendor upload images after job complete
+        //[Authorize(Roles = "Vendor")] //Vendor upload images after job complete
         public async Task<IActionResult> UploadImages(Guid id, [FromForm] UploadTicketImagesDto dto)
         {
            

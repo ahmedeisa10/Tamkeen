@@ -66,7 +66,6 @@ namespace Tamkeen.Infrastructure.DependencyInjection
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITicketService, TicketService>();
             services.AddScoped<IImageService, ImageService>();
-            services.AddAutoMapper(typeof(TicketProfile).Assembly);
 
             //// Repositories
             //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
