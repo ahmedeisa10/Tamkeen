@@ -7,6 +7,7 @@ using Tamkeen.Infrastructure.Services;
 using SendGrid.Helpers.Errors.Model;
 using Tamkeen.Domain.Entities;
 using Tamkeen.Domain.Enums;
+using Tamkeen.Application.Interfaces.Ticket_Interface;
 
 namespace Tamkeen.API.Controllers
 {

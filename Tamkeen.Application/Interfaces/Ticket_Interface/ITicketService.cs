@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Tamkeen.Application.DTOs.Ticket_DTOs;
 
-namespace Tamkeen.Infrastructure.Services
+namespace Tamkeen.Application.Interfaces.Ticket_Interface
 {
     public interface ITicketService
     {

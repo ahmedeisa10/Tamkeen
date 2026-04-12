@@ -7,24 +7,24 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using SendGrid.Helpers.Errors.Model;
 using Tamkeen.Application.DTOs.Ticket_DTOs;
+using Tamkeen.Application.Interfaces.Ticket_Interface;
 using Tamkeen.Domain.Entities;
 using Tamkeen.Domain.Enums;
 using Tamkeen.Infrastructure.Data;
+using Tamkeen.Infrastructure.Services;
 
-namespace Tamkeen.Infrastructure.Services
+namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
 {
-
-    
-        public class TicketService : ITicketService
-        {
-            private readonly AppDbContext _context;
-            private readonly IMapper _mapper;
+    public class TicketService : ITicketService
+    {
+        private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
         private readonly IImageService imageService;
 
-        public TicketService(AppDbContext context, IMapper mapper,IImageService imageService)
-            {
-                _context = context;
-                _mapper = mapper;
+        public TicketService(AppDbContext context, IMapper mapper, IImageService imageService)
+        {
+            _context = context;
+            _mapper = mapper;
             this.imageService = imageService;
         }
 
@@ -93,25 +93,25 @@ namespace Tamkeen.Infrastructure.Services
         }
 
         public async Task<IEnumerable<TicketResponseDto>> GetAllAsync(string userId, string role)
+        {
+            var query = _context.Tickets
+                .Include(t => t.Tenant)
+                .Include(t => t.Vendor)
+                .Include(t => t.Images)
+                .AsQueryable();
+
+            query = role switch
             {
-                var query = _context.Tickets
-                    .Include(t => t.Tenant)
-                    .Include(t => t.Vendor)
-                    .Include(t => t.Images)
-                    .AsQueryable();
+                "Tenant" => query.Where(t => t.TenantId == userId),
+                "Vendor" => query.Where(t => t.VendorId == userId),
+                _ => query // Manager يشوف الكل
+            };
 
-                query = role switch
-                {
-                    "Tenant" => query.Where(t => t.TenantId == userId),
-                    "Vendor" => query.Where(t => t.VendorId == userId),
-                    _ => query // Manager يشوف الكل
-                };
+            var tickets = await query.ToListAsync();
+            return _mapper.Map<IEnumerable<TicketResponseDto>>(tickets);
+        }
 
-                var tickets = await query.ToListAsync();
-                return _mapper.Map<IEnumerable<TicketResponseDto>>(tickets);
-            }
 
-        
         public async Task AssignVendorAsync(Guid id, AssignTicketDto dto)
         {
             var ticket = await _context.Tickets.FindAsync(id)
@@ -224,5 +224,5 @@ namespace Tamkeen.Infrastructure.Services
             return _mapper.Map<List<ImageResponseDto>>(savedImages);
         }
     }
-    
+
 }

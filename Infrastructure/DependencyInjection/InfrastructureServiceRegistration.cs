@@ -7,10 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Tamkeen.Application.Interfaces.Auth;
+using Tamkeen.Application.Interfaces.Ticket_Interface;
 using Tamkeen.Application.Mapping;
 using Tamkeen.Domain.Entities;
 using Tamkeen.Infrastructure.Data;
 using Tamkeen.Infrastructure.Implementation.Auth;
+using Tamkeen.Infrastructure.Implementation.Ticket_Implementation;
 using Tamkeen.Infrastructure.Services;
 using Tamkeen.Infrastructure.Setting;
 
