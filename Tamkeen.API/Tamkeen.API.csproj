@@ -25,4 +25,8 @@
     <ProjectReference Include="..\Tamkeen.Application\Tamkeen.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>
