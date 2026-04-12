@@ -11,9 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\" />
-    <Folder Include="Interfaces\" />
-    <Folder Include="DTOs\" />
+    <Folder Include="Features\Company\Handler\Command\" />
+    <Folder Include="Features\Company\Handler\Query\" />
+    <Folder Include="Features\Company\Request\Command\" />
+    <Folder Include="Features\Company\Request\Query\" />
   </ItemGroup>
 
   <ItemGroup>

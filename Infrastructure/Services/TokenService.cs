@@ -1,39 +1,45 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Tamkeen.Infrastructure.Setting;
 
 namespace Infrastructure.Services
 {
     public class TokenService : ITokenService
     {
-        private readonly IConfiguration _config;
+        private readonly JwtSetting _jwt;
 
-        public TokenService(IConfiguration config)
+        public TokenService(IOptions<JwtSetting> jwt)
         {
-            _config = config;
+            _jwt = jwt.Value;
         }
 
-        public string GenerateToken(int userId, string username, IList<string>? roles = null)
+        public string GenerateToken(string userId, string email, IList<string> roles)
         {
             var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(ClaimTypes.Email, email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+            foreach (var role in roles)
             {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Name, username)
-            };
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
-            if (roles != null)
-                claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var expiry = DateTime.UtcNow.AddMonths(_jwt.DurationInMonths);
+
             var token = new JwtSecurityToken(
-                _config["Jwt:Issuer"],
-                _config["Jwt:Audience"],
-                claims,
-                expires: DateTime.UtcNow.AddMonths(Convert.ToInt32(_config["Jwt:DurationInMonths"])),
+                issuer: _jwt.Issuer,
+                audience: _jwt.Audience,
+                claims: claims,
+                expires: expiry,
                 signingCredentials: creds
             );
 

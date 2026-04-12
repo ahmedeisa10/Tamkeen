@@ -6,8 +6,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Tamkeen.Application.Interfaces.Auth;
 using Tamkeen.Domain.Entities;
 using Tamkeen.Infrastructure.Data;
+using Tamkeen.Infrastructure.Implementation.Auth;
+using Tamkeen.Infrastructure.Setting;
 
 namespace Tamkeen.Infrastructure.DependencyInjection
 {
@@ -31,7 +34,7 @@ namespace Tamkeen.Infrastructure.DependencyInjection
             })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
-            var jwtKey = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
+            var jwtKey = configuration.GetSection("Jwt").Get<JwtSetting>();
 
             services.AddAuthentication(options =>
             {
@@ -48,14 +51,15 @@ namespace Tamkeen.Infrastructure.DependencyInjection
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(jwtKey)
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey.Key))
                 };
             });
-
             // Services
+            services.Configure<JwtSetting>(configuration.GetSection("Jwt"));
             services.Configure<EmailSetting>(configuration.GetSection("EmailSetting"));
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IAuthService, AuthService>();
 
 
             //// Repositories
