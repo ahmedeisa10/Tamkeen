@@ -15,19 +15,17 @@ namespace Tamkeen.API.Controllers
             _authService = authService;
         }
 
-        // ================= REGISTER =================
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
             var result = await _authService.RegisterAsync(dto);
 
             if (!result.Success)
-                return BadRequest(result.Message);
+                return BadRequest(new { message = result.Message });
 
-            return Ok(result.Message);
+            return Ok(new { message = "Registered successfully" });
         }
 
-        // ================= CONFIRM EMAIL =================
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(ConfirmEmailDto dto)
         {
@@ -36,10 +34,9 @@ namespace Tamkeen.API.Controllers
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            return Ok(result.Message);
+            return Ok(result.Data); // ✅ رجعنا الداتا (token)
         }
 
-        // ================= LOGIN =================
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
@@ -49,6 +46,17 @@ namespace Tamkeen.API.Controllers
                 return BadRequest(result.Message);
 
             return Ok(result.Data);
+        }
+
+        [HttpPost("resend-code")]
+        public async Task<IActionResult> ResendCode([FromBody] ResendCodeDto dto)
+        {
+            var result = await _authService.ResendCodeAsync(dto.Email);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
         }
     }
 }

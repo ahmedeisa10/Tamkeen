@@ -12,6 +12,7 @@ namespace Tamkeen.Application.DTOs.Ticket_DTOs
     {
         public string Description { get; set; }
         public Priority Priority { get; set; }
+        public string TenantLocation { get; set; }
         public DateTime Arrival { get; set; }
         public DateTime Deadline { get; set; }
         public Guid CompanyId { get; set; }

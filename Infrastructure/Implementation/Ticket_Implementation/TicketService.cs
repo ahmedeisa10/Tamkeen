@@ -30,6 +30,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
                 Id = Guid.NewGuid(),
                 Description = dto.Description,
                 Priority = dto.Priority,
+                TenantLocation = dto.TenantLocation,
                 Arrival = dto.Arrival,
                 Deadline = dto.Deadline,
                 CompanyId = dto.CompanyId,

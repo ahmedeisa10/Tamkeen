@@ -15,11 +15,12 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("default", policy =>
+    options.AddPolicy("AllowAngular", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 builder.Services.AddSwaggerGen();
@@ -32,7 +33,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors("AllowAngular");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

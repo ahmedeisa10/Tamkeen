@@ -48,8 +48,7 @@ namespace Tamkeen.Infrastructure.Implementation.Auth
             if (!result.Succeeded)
                 return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
 
-            // default role = Tenant
-            await _userManager.AddToRoleAsync(user, UserRole.Manager.ToString());
+            await _userManager.AddToRoleAsync(user, UserRole.Tenant.ToString());
 
             await _emailService.SendConfirmationEmail(dto.Email, code);
 
@@ -57,20 +56,21 @@ namespace Tamkeen.Infrastructure.Implementation.Auth
         }
 
         // ================= CONFIRM EMAIL =================
-        public async Task<(bool Success, string Message)> ConfirmEmailAsync(ConfirmEmailDto dto)
+        public async Task<(bool Success, ConfirmEmailResponseDto? Data, string Message)> ConfirmEmailAsync(ConfirmEmailDto dto)
         {
-            var hashed = ConfirmationCodeHasher.Hash(dto.Code);
+            var user = await _userManager.FindByEmailAsync(dto.Email);
 
-            var user = await _userManager.Users
-                .FirstOrDefaultAsync(x =>
-                    x.EmailConfirmationCode == hashed &&
-                    !x.EmailConfirmed);
+            if (user == null || user.EmailConfirmed)
+                return (false, null, "Invalid code.");
 
-            if (user == null)
-                return (false, "Invalid code.");
+            // ✅ verify بدل hash compare
+            var isValid = ConfirmationCodeHasher.Verify(dto.Code, user.EmailConfirmationCode);
+
+            if (!isValid)
+                return (false, null, "Invalid code.");
 
             if (user.CodeExpiry < DateTime.UtcNow)
-                return (false, "Code expired.");
+                return (false, null, "Code expired.");
 
             user.EmailConfirmed = true;
             user.EmailConfirmationCode = null;
@@ -78,7 +78,16 @@ namespace Tamkeen.Infrastructure.Implementation.Auth
 
             await _userManager.UpdateAsync(user);
 
-            return (true, "Email confirmed successfully.");
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _tokenService.GenerateToken(user.Id, user.Email!, roles);
+
+            return (true, new ConfirmEmailResponseDto
+            {
+                Token = token,
+                Email = user.Email!,
+                FullName = user.FullName,
+                Roles = roles
+            }, "Email confirmed successfully.");
         }
 
         // ================= LOGIN =================
@@ -98,7 +107,6 @@ namespace Tamkeen.Infrastructure.Implementation.Auth
                 return (false, null, "Invalid credentials.");
 
             var roles = await _userManager.GetRolesAsync(user);
-
             var token = _tokenService.GenerateToken(user.Id, user.Email!, roles);
 
             return (true, new AuthResponseDto
@@ -108,6 +116,29 @@ namespace Tamkeen.Infrastructure.Implementation.Auth
                 FullName = user.FullName,
                 Roles = roles
             }, "Login successful.");
+        }
+
+        // ================= RESEND CODE =================
+        public async Task<(bool Success, string Message)> ResendCodeAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return (false, "User not found.");
+
+            if (user.EmailConfirmed)
+                return (false, "Email already confirmed.");
+
+            var code = new Random().Next(100000, 999999).ToString();
+
+            user.EmailConfirmationCode = ConfirmationCodeHasher.Hash(code);
+            user.CodeExpiry = DateTime.UtcNow.AddMinutes(10);
+
+            await _userManager.UpdateAsync(user);
+
+            await _emailService.SendConfirmationEmail(email, code);
+
+            return (true, "Code sent again.");
         }
     }
 }
