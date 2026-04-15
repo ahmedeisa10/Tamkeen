@@ -5,6 +5,7 @@ namespace Tamkeen.Domain.Entities
     {
         public Guid Id { get; set; }
         public string Description { get; set; }
+        public string TenantLocation { get; set; }
 
         public RequestStatus Status { get; set; }
         public Priority Priority { get; set; }
