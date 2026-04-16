@@ -22,17 +22,9 @@ namespace Tamkeen.Infrastructure.Implementation
             _userManager = userManager;
         }
 
-        public async Task CreateProfileAsync(Guid userId, CreateVendorProfileDto dto)
+        public async Task CreateProfileAsync( CreateVendorProfileDto dto)
         {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-
-            if (user == null)
-                throw new Exception("User not found");
-
-            // تأكد إنه Vendor
-            var roles = await _userManager.GetRolesAsync(user);
-            if (!roles.Contains("Vendor"))
-                throw new Exception("User is not a vendor");
+           
 
             var profile = new VendorProfile
             {

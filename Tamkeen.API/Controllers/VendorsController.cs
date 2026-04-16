@@ -18,12 +18,12 @@ namespace Tamkeen.API.Controllers
         }
 
         [HttpPost("profile")]
-        [Authorize(Roles = "Vendor")]
+        //[Authorize(Roles = "Vendor")]
         public async Task<IActionResult> CreateProfile(CreateVendorProfileDto dto)
         {
             var userId = User.FindFirst("uid")?.Value;
 
-            await _service.CreateProfileAsync(Guid.Parse(userId),dto);
+            await _service.CreateProfileAsync(dto);
 
             return Ok(new { message = "Profile created successfully" });
         }

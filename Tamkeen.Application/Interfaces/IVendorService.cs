@@ -9,6 +9,6 @@ namespace Tamkeen.Application.Interfaces
 {
     public interface IVendorService
     {
-        Task CreateProfileAsync(Guid userId, CreateVendorProfileDto dto);
+        Task CreateProfileAsync(CreateVendorProfileDto dto);
     }
 }
