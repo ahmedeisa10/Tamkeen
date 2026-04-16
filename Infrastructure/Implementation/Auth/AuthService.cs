@@ -111,10 +111,10 @@ namespace Tamkeen.Infrastructure.Implementation.Auth
 
             return (true, new AuthResponseDto
             {
-                Token = token,
-                Email = user.Email!,
-                FullName = user.FullName,
-                Roles = roles
+                token = token,
+                email = user.Email!,
+                fullName = user.FullName,
+                roles = roles
             }, "Login successful.");
         }
 

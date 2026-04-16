@@ -2,9 +2,9 @@
 {
     public class AuthResponseDto
     {
-        public string Token { get; set; }
-        public string Email { get; set; }
-        public string FullName { get; set; }
-        public IList<string> Roles { get; set; }
+        public string token { get; set; }      
+        public string email { get; set; }      
+        public string fullName { get; set; }   
+        public IList<string> roles { get; set; } 
     }
 }

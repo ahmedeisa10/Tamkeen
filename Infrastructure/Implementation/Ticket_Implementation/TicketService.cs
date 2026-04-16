@@ -31,6 +31,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
                 Description = dto.Description,
                 Priority = dto.Priority,
                 TenantLocation = dto.TenantLocation,
+                problemType = dto.problemType,
                 Arrival = dto.Arrival,
                 Deadline = dto.Deadline,
                 CompanyId = dto.CompanyId,

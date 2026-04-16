@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Tamkeen.Application.DTOs.Ticket_DTOs;
 using Tamkeen.Application.Interfaces.Ticket_Interface;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Tamkeen.API.Controllers
 {
@@ -18,12 +19,11 @@ namespace Tamkeen.API.Controllers
             _ticketService = ticketService;
         }
 
-        private string GetUserId() =>
-            User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-        private string GetUserRole() =>
-            User.FindFirstValue(ClaimTypes.Role)!;
-
+        private string GetUserId()
+        {
+            return User.FindFirstValue("sub")!;
+        }
+        private string GetUserRole() => User.FindFirstValue("role")!;
         // GET /api/tickets
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -40,12 +40,12 @@ namespace Tamkeen.API.Controllers
             return Ok(ticket);
         }
 
-        // POST /api/tickets
         [HttpPost]
         [Authorize(Roles = "Tenant")]
         public async Task<IActionResult> Create([FromForm] CreateTicketDto dto)
         {
-            var ticket = await _ticketService.CreateAsync(dto, GetUserId());
+            var tenantId = GetUserId();
+            var ticket = await _ticketService.CreateAsync(dto, tenantId);
             return CreatedAtAction(nameof(GetById), new { id = ticket.Id }, ticket);
         }
 
