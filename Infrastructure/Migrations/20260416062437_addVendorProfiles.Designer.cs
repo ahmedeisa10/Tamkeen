@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tamkeen.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Tamkeen.Infrastructure.Data;
 namespace Tamkeen.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260416062437_addVendorProfiles")]
+    partial class addVendorProfiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -431,6 +434,13 @@ namespace Tamkeen.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("bio")
                         .HasColumnType("nvarchar(max)");
 
@@ -450,6 +460,8 @@ namespace Tamkeen.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("vendorProfiles");
                 });
@@ -589,6 +601,17 @@ namespace Tamkeen.Infrastructure.Migrations
                     b.Navigation("Tenant");
 
                     b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("Tamkeen.Domain.Entities.VendorProfile", b =>
+                {
+                    b.HasOne("Tamkeen.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.Company", b =>

@@ -13,6 +13,7 @@ namespace Tamkeen.Infrastructure.Data
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<SparePartRequest> SparePartRequests { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<VendorProfile> vendorProfiles { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
