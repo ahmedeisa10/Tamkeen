@@ -6,7 +6,7 @@ namespace Tamkeen.Domain.Entities
         public Guid Id { get; set; }
         public string Description { get; set; }
         public string TenantLocation { get; set; }
-
+        public string problemType { get; set; }
         public RequestStatus Status { get; set; }
         public Priority Priority { get; set; }
         public DateTime Arrival { get; set; }
@@ -16,8 +16,8 @@ namespace Tamkeen.Domain.Entities
         public AppUser Tenant { get; set; }
         public string? VendorId { get; set; }
         public AppUser Vendor { get; set; }
-        public Guid CompanyId { get; set; }
-        public Company Company { get; set; }
+        public Guid? CompanyId { get; set; }
+        public Company? Company { get; set; }
         public ICollection<Image> Images { get; set; }
     }
 }
