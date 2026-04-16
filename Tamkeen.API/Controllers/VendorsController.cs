@@ -18,7 +18,6 @@ namespace Tamkeen.API.Controllers
         }
 
         [HttpPost("profile")]
-        //[Authorize(Roles = "Vendor")]
         public async Task<IActionResult> CreateProfile(CreateVendorProfileDto dto)
         {
             var userId = User.FindFirst("uid")?.Value;
