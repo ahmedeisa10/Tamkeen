@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Tamkeen.Application.DTOs;
+using Tamkeen.Application.DTOs.Vendor;
 using Tamkeen.Application.Interfaces;
 using Tamkeen.Domain.Entities;
 using Tamkeen.Infrastructure.Data;
@@ -38,5 +40,21 @@ namespace Tamkeen.Infrastructure.Implementation
             _context.vendorProfiles.Add(profile);
             await _context.SaveChangesAsync();
         }
+        public async Task<IEnumerable<VendorResponseDto>> GetAllVendorsAsync()
+        {
+            return await _context.vendorProfiles
+                .OrderByDescending(v => v.CreatedAt)
+                .Select(v => new VendorResponseDto
+                {
+                    fullName = v.fullName,
+                    phone = v.phone,
+                    specialty = v.specialty,
+                    yearsExperience = v.yearsExperience,
+                    bio = v.bio,
+                    CreatedAt = v.CreatedAt
+                })
+                .ToListAsync();
+        }
+
     }
 }

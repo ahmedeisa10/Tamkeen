@@ -26,5 +26,12 @@ namespace Tamkeen.API.Controllers
 
             return Ok(new { message = "Profile created successfully" });
         }
+        [HttpGet]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GetAllVendors()
+        {
+            var vendors = await _service.GetAllVendorsAsync();
+            return Ok(vendors);
+        }
     }
 }
