@@ -9,8 +9,6 @@ namespace Tamkeen.Domain.Entities
     public class VendorProfile
     {
         public Guid Id { get; set; }
-
-
         public string fullName { get; set; } = null!;
         public string phone { get; set; } = null!;
         public string specialty { get; set; } = null!;

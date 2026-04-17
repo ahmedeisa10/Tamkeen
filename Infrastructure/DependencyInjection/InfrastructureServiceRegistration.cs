@@ -83,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped<ITicketService, TicketService>();
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IVendorService, VendorService>();
+        services.AddScoped<IInvitationService, InvitationService>();
 
         return services;
     }
