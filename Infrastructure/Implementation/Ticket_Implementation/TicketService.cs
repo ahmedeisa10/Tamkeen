@@ -31,6 +31,8 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
                 Description = dto.Description,
                 Priority = dto.Priority,
                 TenantLocation = dto.TenantLocation,
+                Governorate = dto.Governorate,
+                City = dto.City,
                 problemType = dto.problemType,
                 Arrival = dto.Arrival,
                 Deadline = dto.Deadline,
@@ -89,7 +91,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             return _mapper.Map<TicketResponseDto>(ticket);
         }
 
-        public async Task<IEnumerable<TicketResponseDto>> GetAllAsync(string userId, string role)
+        public async Task<IEnumerable<TicketResponseDto>> GetAllAsync(string userId, string role,string? governorate = null,string? city = null)
         {
             var query = _context.Tickets
                 .Include(t => t.Tenant)
@@ -103,6 +105,12 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
                 "Vendor" => query.Where(t => t.VendorId == userId),
                 _ => query // Manager يشوف الكل
             };
+
+            if (!string.IsNullOrWhiteSpace(governorate))
+                query = query.Where(t => t.Governorate == governorate);
+
+            if (!string.IsNullOrWhiteSpace(city))
+                query = query.Where(t => t.City == city);
 
             var tickets = await query.ToListAsync();
             return _mapper.Map<IEnumerable<TicketResponseDto>>(tickets);

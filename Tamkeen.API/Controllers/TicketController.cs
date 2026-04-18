@@ -26,9 +26,9 @@ namespace Tamkeen.API.Controllers
         private string GetUserRole() => User.FindFirstValue("role")!;
         // GET /api/tickets
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] string? governorate = null,[FromQuery] string? city = null)
         {
-            var tickets = await _ticketService.GetAllAsync(GetUserId(), GetUserRole());
+            var tickets = await _ticketService.GetAllAsync(GetUserId(), GetUserRole(), governorate, city);
             return Ok(tickets);
         }
 
