@@ -45,13 +45,19 @@ namespace Tamkeen.Infrastructure.Implementation
             _context.vendorInvitations.Add(invitation);
             await _context.SaveChangesAsync();
 
-            // اللينك الأساسي
+            // لينك التسجيل
             var registrationLink = $"http://localhost:4200/vendor-register?token={token}";
 
-            // encode الـ text عشان يتبعت صح في الـ URL
-            var encodedText = Uri.EscapeDataString(registrationLink);
+            // رسالة واتساب جميلة
+            var message = $"🎉 مبارك انضمامك لينا!\n\n" +
+                          $"أهلاً بيك في فريقنا 👋\n" +
+                          $"يسعدنا وجودك معانا 💙\n\n" +
+                          $"سجل من هنا 👇\n{registrationLink}";
 
-            // لينك الواتس مع رقم الـ vendor
+            // encode الرسالة
+            var encodedText = Uri.EscapeDataString(message);
+
+            // لينك واتساب
             var whatsappLink = $"https://wa.me/{phone}?text={encodedText}";
 
             return whatsappLink;
