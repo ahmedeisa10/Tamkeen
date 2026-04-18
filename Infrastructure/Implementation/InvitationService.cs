@@ -46,7 +46,7 @@ namespace Tamkeen.Infrastructure.Implementation
             await _context.SaveChangesAsync();
 
             // اللينك اللي هيتبعت على الواتس
-            var link = $"https://yoursite.com/vendor-register?token={token}";
+            var link = $"http://localhost:4200/vendor-register?token={token}";
             return link;
         }
 

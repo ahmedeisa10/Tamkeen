@@ -10,7 +10,6 @@ namespace Tamkeen.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class InvitationController : ControllerBase
     {
         private readonly IInvitationService _invitationService;
