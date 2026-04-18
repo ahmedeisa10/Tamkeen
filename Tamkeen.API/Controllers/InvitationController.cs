@@ -48,12 +48,16 @@ namespace Tamkeen.API.Controllers
         [HttpPost("register-vendor")]
         public async Task<IActionResult> RegisterVendor([FromBody] VendorRegisterDto dto)
         {
-            var result = await _invitationService.RegisterVendorAsync(dto);
+            var (success, message, token) = await _invitationService.RegisterVendorAsync(dto);
 
-            if (!result.Success)
-                return BadRequest(new { message = result.Message });
+            if (!success)
+                return BadRequest(new { message });
 
-            return Ok(new { message = result.Message });
+            return Ok(new
+            {
+                message,
+                token
+            });
         }
     }
 }

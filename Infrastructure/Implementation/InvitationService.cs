@@ -51,47 +51,45 @@ namespace Tamkeen.Infrastructure.Implementation
         }
 
         // ===== الـ Vendor بيسجل عن طريق اللينك =====
-        public async Task<(bool Success, string Message)> RegisterVendorAsync(VendorRegisterDto dto)
+        public async Task<(bool Success, string Message, string? Token)> RegisterVendorAsync(VendorRegisterDto dto)
         {
-            // 1. ابحث عن الـ Token
             var invitation = await _context.vendorInvitations
                 .FirstOrDefaultAsync(x => x.Token == dto.Token);
 
             if (invitation == null)
-                return (false, "Invalid invitation link.");
+                return (false, "Invalid invitation link.", null);
 
             if (invitation.IsUsed)
-                return (false, "This invitation has already been used.");
+                return (false, "This invitation has already been used.", null);
 
             if (invitation.ExpiresAt < DateTime.UtcNow)
-                return (false, "Invitation link has expired.");
+                return (false, "Invitation link has expired.", null);
 
-            // 2. تحقق الـ Email مش موجود
             var existing = await _userManager.FindByEmailAsync(dto.Email);
             if (existing != null)
-                return (false, "Email already exists.");
+                return (false, "Email already exists.", null);
 
-            // 3. انشئ الـ User
             var user = new AppUser
             {
                 UserName = dto.Email,
                 Email = dto.Email,
                 FullName = dto.FullName,
-                EmailConfirmed = true  // مش محتاج confirm لأن المانجر اتواصل معاه
+                EmailConfirmed = true
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
-                return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
+                return (false, string.Join(", ", result.Errors.Select(e => e.Description)), null);
 
-            // 4. ضيفه كـ Vendor
             await _userManager.AddToRoleAsync(user, UserRole.Vendor.ToString());
 
-            // 5. خلي التوكن مستخدم
             invitation.IsUsed = true;
             await _context.SaveChangesAsync();
 
-            return (true, "Vendor registered successfully.");
+            var roles = await _userManager.GetRolesAsync(user);
+            var token = _tokenService.GenerateToken(user.Id, user.Email!, roles);
+
+            return (true, "Vendor registered successfully.", token);
         }
     }
 }
