@@ -33,21 +33,28 @@ namespace Tamkeen.Infrastructure.Implementation
         // ===== المانجر بيعمل Invitation =====
         public async Task<string> CreateInvitationAsync(string phone)
         {
-            var token = Guid.NewGuid().ToString("N"); // مثلا: a1b2c3d4...
+            var token = Guid.NewGuid().ToString("N");
 
             var invitation = new VendorInvitation
             {
                 Phone = phone,
                 Token = token,
-                ExpiresAt = DateTime.UtcNow.AddDays(3) // اللينك صالح 3 أيام
+                ExpiresAt = DateTime.UtcNow.AddDays(3)
             };
 
             _context.vendorInvitations.Add(invitation);
             await _context.SaveChangesAsync();
 
-            // اللينك اللي هيتبعت على الواتس
-            var link = $"http://localhost:4200/vendor-register?token={token}";
-            return link;
+            // اللينك الأساسي
+            var registrationLink = $"http://localhost:4200/vendor-register?token={token}";
+
+            // encode الـ text عشان يتبعت صح في الـ URL
+            var encodedText = Uri.EscapeDataString(registrationLink);
+
+            // لينك الواتس مع رقم الـ vendor
+            var whatsappLink = $"https://wa.me/{phone}?text={encodedText}";
+
+            return whatsappLink;
         }
 
         // ===== الـ Vendor بيسجل عن طريق اللينك =====
