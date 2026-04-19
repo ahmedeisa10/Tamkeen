@@ -40,6 +40,14 @@ namespace Tamkeen.API.Controllers
             return Ok(ticket);
         }
 
+        [HttpGet("pending")]
+        [Authorize(Roles = "Vendor,Manager")]
+        public async Task<IActionResult> GetPendingTickets()
+        {
+            var tickets = await _ticketService.GetPendingTicketsAsync();
+            return Ok(tickets);
+        }
+
         [HttpPost]
         [Authorize(Roles = "Tenant")]
         public async Task<IActionResult> Create([FromForm] CreateTicketDto dto)

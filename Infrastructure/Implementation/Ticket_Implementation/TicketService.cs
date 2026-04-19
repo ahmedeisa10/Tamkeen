@@ -67,6 +67,17 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             return _mapper.Map<TicketResponseDto>(ticket);
         }
 
+        public async Task<IEnumerable<TicketResponseDto>> GetPendingTicketsAsync()
+        {
+            var tickets = await _context.Tickets
+        .Include(t => t.Tenant)
+        .Include(t => t.Images)
+        .Where(t => t.Status == RequestStatus.Pending)
+        .ToListAsync();
+
+            return _mapper.Map<IEnumerable<TicketResponseDto>>(tickets);
+        }
+
         public async Task<TicketResponseDto> GetByIdAsync(Guid id, string userId, string role)
         {
             var ticket = await _context.Tickets
@@ -228,6 +239,8 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
 
             return _mapper.Map<List<ImageResponseDto>>(savedImages);
         }
+
+        
     }
 
 }

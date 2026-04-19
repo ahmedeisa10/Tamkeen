@@ -9,6 +9,7 @@ namespace Tamkeen.Application.Interfaces.Ticket_Interface
 {
     public interface ITicketService
     {
+        Task<IEnumerable<TicketResponseDto>> GetPendingTicketsAsync();
         Task<TicketResponseDto> CreateAsync(CreateTicketDto dto, string tenantId);
         Task<TicketResponseDto> GetByIdAsync(Guid id, string userId, string role);
         Task<IEnumerable<TicketResponseDto>> GetAllAsync(string userId, string role, string? governorate = null, string? city = null);
