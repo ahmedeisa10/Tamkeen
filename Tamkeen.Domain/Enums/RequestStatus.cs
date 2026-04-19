@@ -3,7 +3,7 @@
     public enum RequestStatus
     {
         Pending,
-        Assigned,
+        //Assigned,
         InProgress,
         Resolved,
         Closed
