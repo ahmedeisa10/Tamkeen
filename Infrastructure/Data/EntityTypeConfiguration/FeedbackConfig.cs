@@ -10,6 +10,17 @@ namespace Tamkeen.Infrastructure.Data.EntityTypeConfiguration
         {
             builder.Property(x => x.Comment)
                 .HasMaxLength(1000);
+
+
+            builder.HasOne(f => f.Tenant)
+                .WithMany(u => u.TenantFeedbacks)
+                .HasForeignKey(f => f.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(f => f.Vendor)
+                .WithMany(u => u.VendorFeedbacks)
+                .HasForeignKey(f => f.VendorId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

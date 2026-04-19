@@ -11,10 +11,6 @@ namespace Tamkeen.Infrastructure.Data.EntityTypeConfiguration
                 .IsRequired()
                 .HasMaxLength(150);
 
-            builder.HasOne(x => x.Company)
-                .WithMany(c => c.Users)
-                .HasForeignKey(x => x.CompanyId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

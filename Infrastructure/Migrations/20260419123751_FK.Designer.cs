@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tamkeen.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Tamkeen.Infrastructure.Data;
 namespace Tamkeen.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419123751_FK")]
+    partial class FK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -292,27 +295,19 @@ namespace Tamkeen.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Comment")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("VendorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("TenantId");
-
                     b.HasIndex("TicketId");
-
-                    b.HasIndex("VendorId");
 
                     b.ToTable("Feedbacks");
                 });
@@ -550,9 +545,12 @@ namespace Tamkeen.Infrastructure.Migrations
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.AppUser", b =>
                 {
-                    b.HasOne("Tamkeen.Domain.Entities.Company", null)
+                    b.HasOne("Tamkeen.Domain.Entities.Company", "Company")
                         .WithMany("Users")
-                        .HasForeignKey("CompanyId");
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.ChatMessage", b =>
@@ -576,29 +574,13 @@ namespace Tamkeen.Infrastructure.Migrations
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.Feedback", b =>
                 {
-                    b.HasOne("Tamkeen.Domain.Entities.AppUser", "Tenant")
-                        .WithMany("TenantFeedbacks")
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Tamkeen.Domain.Entities.Ticket", "Ticket")
                         .WithMany()
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Tamkeen.Domain.Entities.AppUser", "Vendor")
-                        .WithMany("VendorFeedbacks")
-                        .HasForeignKey("VendorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-
                     b.Navigation("Ticket");
-
-                    b.Navigation("Vendor");
                 });
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.Image", b =>
@@ -645,13 +627,6 @@ namespace Tamkeen.Infrastructure.Migrations
                     b.Navigation("Tenant");
 
                     b.Navigation("Vendor");
-                });
-
-            modelBuilder.Entity("Tamkeen.Domain.Entities.AppUser", b =>
-                {
-                    b.Navigation("TenantFeedbacks");
-
-                    b.Navigation("VendorFeedbacks");
                 });
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.Company", b =>

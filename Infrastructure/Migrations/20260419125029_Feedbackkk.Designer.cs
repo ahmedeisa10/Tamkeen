@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tamkeen.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Tamkeen.Infrastructure.Data;
 namespace Tamkeen.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419125029_Feedbackkk")]
+    partial class Feedbackkk
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -550,9 +553,12 @@ namespace Tamkeen.Infrastructure.Migrations
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.AppUser", b =>
                 {
-                    b.HasOne("Tamkeen.Domain.Entities.Company", null)
+                    b.HasOne("Tamkeen.Domain.Entities.Company", "Company")
                         .WithMany("Users")
-                        .HasForeignKey("CompanyId");
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.ChatMessage", b =>
@@ -577,7 +583,7 @@ namespace Tamkeen.Infrastructure.Migrations
             modelBuilder.Entity("Tamkeen.Domain.Entities.Feedback", b =>
                 {
                     b.HasOne("Tamkeen.Domain.Entities.AppUser", "Tenant")
-                        .WithMany("TenantFeedbacks")
+                        .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -589,7 +595,7 @@ namespace Tamkeen.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Tamkeen.Domain.Entities.AppUser", "Vendor")
-                        .WithMany("VendorFeedbacks")
+                        .WithMany()
                         .HasForeignKey("VendorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -645,13 +651,6 @@ namespace Tamkeen.Infrastructure.Migrations
                     b.Navigation("Tenant");
 
                     b.Navigation("Vendor");
-                });
-
-            modelBuilder.Entity("Tamkeen.Domain.Entities.AppUser", b =>
-                {
-                    b.Navigation("TenantFeedbacks");
-
-                    b.Navigation("VendorFeedbacks");
                 });
 
             modelBuilder.Entity("Tamkeen.Domain.Entities.Company", b =>

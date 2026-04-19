@@ -6,7 +6,11 @@ namespace Tamkeen.Domain.Entities
         public string FullName { get; set; }
         public string? EmailConfirmationCode { get; set; }
         public DateTime? CodeExpiry { get; set; }
-        public Guid? CompanyId { get; set; }
-        public Company Company { get; set; }
+
+        // الـ Feedbacks اللي كتبها كـ Tenant
+        public ICollection<Feedback> TenantFeedbacks { get; set; }
+
+        // الـ Feedbacks اللي اتقيّم فيها كـ Vendor
+        public ICollection<Feedback> VendorFeedbacks { get; set; }
     }
 }
