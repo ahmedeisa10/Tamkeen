@@ -59,13 +59,13 @@ namespace Tamkeen.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = ticket.Id }, ticket);
         }
 
-        [HttpPatch("{id}/assign")]
-        [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> AssignVendor(Guid id, [FromBody] AssignTicketDto dto)
-        {
-            await _ticketService.AssignVendorAsync(id, dto);
-            return NoContent();
-        }
+        //[HttpPatch("{id}/assign")]
+        //[Authorize(Roles = "Manager")]
+        //public async Task<IActionResult> AssignVendor(Guid id, [FromBody] AssignTicketDto dto)
+        //{
+        //    await _ticketService.AssignVendorAsync(id, dto);
+        //    return NoContent();
+        //}
 
         // PATCH /api/tickets/{id}/accept
         [HttpPatch("{id}/accept")]
@@ -77,13 +77,13 @@ namespace Tamkeen.API.Controllers
         }
 
         // PATCH /api/tickets/{id}/reject
-        [HttpPatch("{id}/reject")]
-        [Authorize(Roles = "Vendor")]
-        public async Task<IActionResult> Reject(Guid id)
-        {
-            await _ticketService.RejectAsync(id, GetUserId());
-            return NoContent();
-        }
+        //[HttpPatch("{id}/reject")]
+        //[Authorize(Roles = "Vendor")]
+        //public async Task<IActionResult> Reject(Guid id)
+        //{
+        //    await _ticketService.RejectAsync(id, GetUserId());
+        //    return NoContent();
+        //}
 
         // PATCH /api/tickets/{id}/complete
         [HttpPatch("{id}/complete")]

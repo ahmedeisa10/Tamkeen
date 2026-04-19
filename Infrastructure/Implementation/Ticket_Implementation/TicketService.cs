@@ -139,50 +139,47 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
         }
 
 
-        public async Task AssignVendorAsync(Guid id, AssignTicketDto dto)
-        {
-            var ticket = await _context.Tickets.FindAsync(id)
-                ?? throw new NotFoundException("Ticket not found");
+        //public async Task AssignVendorAsync(Guid id, AssignTicketDto dto)
+        //{
+        //    var ticket = await _context.Tickets.FindAsync(id)
+        //        ?? throw new NotFoundException("Ticket not found");
 
-            if (ticket.Status != RequestStatus.Pending)
-                throw new BadRequestException("Only pending tickets can be assigned");
+        //    if (ticket.Status != RequestStatus.Pending)
+        //        throw new BadRequestException("Only pending tickets can be assigned");
 
-            ticket.VendorId = dto.VendorId;
-            ticket.Status = RequestStatus.Assigned;
-            await _context.SaveChangesAsync();
-        }
+        //    ticket.VendorId = dto.VendorId;
+        //    ticket.Status = RequestStatus.Assigned;
+        //    await _context.SaveChangesAsync();
+        //}
 
         public async Task AcceptAsync(Guid id, string vendorId)
         {
             var ticket = await _context.Tickets.FindAsync(id)
                 ?? throw new NotFoundException("Ticket not found");
 
-            if (ticket.VendorId != vendorId)
-                throw new ForbiddenException("Not your ticket");
-
-            if (ticket.Status != RequestStatus.Assigned)
+            if (ticket.Status != RequestStatus.Pending)
                 throw new BadRequestException("Ticket must be assigned first");
-
+            ticket.VendorId = vendorId;
             ticket.Status = RequestStatus.InProgress;
             await _context.SaveChangesAsync();
         }
 
-        public async Task RejectAsync(Guid id, string vendorId)
-        {
-            var ticket = await _context.Tickets.FindAsync(id)
-                ?? throw new NotFoundException("Ticket not found");
+        //public async Task RejectAsync(Guid id, string vendorId)
+        //{
+        //    var ticket = await _context.Tickets.FindAsync(id)
+        //        ?? throw new NotFoundException("Ticket not found");
 
-            if (ticket.VendorId != vendorId)
-                throw new ForbiddenException("Not your ticket");
+        //    if (ticket.VendorId != vendorId)
+        //        throw new ForbiddenException("Not your ticket");
 
-            if (ticket.Status != RequestStatus.Assigned)
-                throw new BadRequestException("Ticket must be assigned first");
+        //    if (ticket.Status != RequestStatus.Assigned)
+        //        throw new BadRequestException("Ticket must be assigned first");
 
-            // يرجع Pending وينزع الـ Vendor
-            ticket.Status = RequestStatus.Pending;
-            ticket.VendorId = null;
-            await _context.SaveChangesAsync();
-        }
+        //    // يرجع Pending وينزع الـ Vendor
+        //    ticket.Status = RequestStatus.Pending;
+        //    ticket.VendorId = null;
+        //    await _context.SaveChangesAsync();
+        //}
 
         public async Task CompleteAsync(Guid id, string vendorId)
         {
