@@ -41,10 +41,12 @@ namespace Tamkeen.API.Controllers
         }
 
         [HttpGet("pending")]
-        [Authorize(Roles = "Vendor,Manager")]
-        public async Task<IActionResult> GetPendingTickets()
+        [Authorize(Roles = "Vendor")]
+        public async Task<IActionResult> GetPending(
+    [FromQuery] string? governorate = null,
+    [FromQuery] string? city = null)
         {
-            var tickets = await _ticketService.GetPendingTicketsAsync();
+            var tickets = await _ticketService.GetPendingAsync(governorate, city);
             return Ok(tickets);
         }
 

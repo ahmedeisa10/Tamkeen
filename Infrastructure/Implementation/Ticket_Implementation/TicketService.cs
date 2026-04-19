@@ -67,13 +67,24 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             return _mapper.Map<TicketResponseDto>(ticket);
         }
 
-        public async Task<IEnumerable<TicketResponseDto>> GetPendingTicketsAsync()
+        public async Task<IEnumerable<TicketResponseDto>> GetPendingAsync(string? governorate = null,string? city = null)
         {
-            var tickets = await _context.Tickets
-        .Include(t => t.Tenant)
-        .Include(t => t.Images)
-        .Where(t => t.Status == RequestStatus.Pending)
-        .ToListAsync();
+            // [ADD] كل الطلبات اللي مش assigned لفني بعد (Pending أو أي حالة بدون vendor)
+            var query = _context.Tickets
+                .Include(t => t.Tenant)
+                .Include(t => t.Vendor)
+                .Include(t => t.Images)
+                .Where(t=>t.Status==RequestStatus.Pending)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(governorate))
+                query = query.Where(t => t.Governorate == governorate);
+
+            if (!string.IsNullOrWhiteSpace(city))
+                query = query.Where(t => t.City == city);
+
+            var tickets = await query
+                .ToListAsync();
 
             return _mapper.Map<IEnumerable<TicketResponseDto>>(tickets);
         }
