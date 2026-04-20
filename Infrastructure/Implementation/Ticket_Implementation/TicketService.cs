@@ -139,7 +139,6 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
 
             // ── امسح كل الـ applications التانية على نفس التيكيت ──
             var otherApplications = await _context.TicketApplications
-                .Where(a => a.TicketId == application.TicketId && a.Id != applicationId)
                 .ToListAsync();
 
             _context.TicketApplications.RemoveRange(otherApplications);
