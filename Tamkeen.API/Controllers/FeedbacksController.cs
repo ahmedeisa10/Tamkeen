@@ -13,7 +13,7 @@ namespace Tamkeen.API.Controllers
     [Authorize]
     public class FeedbacksController(IFeedbackService _feedbackService) : ControllerBase
     {
-        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        private string GetUserId() => User.FindFirstValue("sub")!;
 
         // POST /api/Feedbacks
         [HttpPost]
