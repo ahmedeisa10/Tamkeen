@@ -21,5 +21,7 @@ namespace Tamkeen.Domain.Entities
         public Guid? CompanyId { get; set; }
         public Company? Company { get; set; }
         public ICollection<Image> Images { get; set; }
+        public ICollection<Feedback> Feedbacks { get; set; }
+        public ICollection<TicketApplication> Applications { get; set; }
     }
 }

@@ -42,14 +42,25 @@ namespace Tamkeen.API.Controllers
 
         [HttpGet("pending")]
         [Authorize(Roles = "Vendor")]
-        public async Task<IActionResult> GetPending(
-    [FromQuery] string? governorate = null,
-    [FromQuery] string? city = null)
+        public async Task<IActionResult> GetPending([FromQuery] string? governorate = null,[FromQuery] string? city = null)
         {
             var tickets = await _ticketService.GetPendingAsync(governorate, city);
             return Ok(tickets);
         }
-
+        [HttpPost("{ticketId}/apply")]
+        [Authorize(Roles = "Vendor")]
+        public async Task<IActionResult> Apply(Guid ticketId)
+        {
+            await _ticketService.ApplyAsync(ticketId, GetUserId());
+            return Ok(new { message = "تم التقديم بنجاح" });
+        }
+        [HttpPatch("{applicationId}/accept")]
+        [Authorize(Roles = "Tenant")]
+        public async Task<IActionResult> AcceptApplication(Guid applicationId)
+        {
+            await _ticketService.AcceptApplicationAsync(applicationId, GetUserId());
+            return Ok(new { message = "تم قبول الفني بنجاح" });
+        }
         [HttpPost]
         [Authorize(Roles = "Tenant")]
         public async Task<IActionResult> Create([FromForm] CreateTicketDto dto)
@@ -58,6 +69,7 @@ namespace Tamkeen.API.Controllers
             var ticket = await _ticketService.CreateAsync(dto, tenantId);
             return CreatedAtAction(nameof(GetById), new { id = ticket.Id }, ticket);
         }
+        #region commented out
 
         //[HttpPatch("{id}/assign")]
         //[Authorize(Roles = "Manager")]
@@ -68,13 +80,13 @@ namespace Tamkeen.API.Controllers
         //}
 
         // PATCH /api/tickets/{id}/accept
-        [HttpPatch("{id}/accept")]
-        [Authorize(Roles = "Vendor")]
-        public async Task<IActionResult> Accept(Guid id)
-        {
-            await _ticketService.AcceptAsync(id, GetUserId());
-            return NoContent();
-        }
+        //[HttpPatch("{id}/accept")]
+        //[Authorize(Roles = "Vendor")]
+        //public async Task<IActionResult> Accept(Guid id)
+        //{
+        //    await _ticketService.AcceptAsync(id, GetUserId());
+        //    return NoContent();
+        //}
 
         // PATCH /api/tickets/{id}/reject
         //[HttpPatch("{id}/reject")]
@@ -84,6 +96,7 @@ namespace Tamkeen.API.Controllers
         //    await _ticketService.RejectAsync(id, GetUserId());
         //    return NoContent();
         //}
+        #endregion
 
         // PATCH /api/tickets/{id}/complete
         [HttpPatch("{id}/complete")]

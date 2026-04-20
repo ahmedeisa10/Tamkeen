@@ -22,6 +22,7 @@ namespace Tamkeen.Application.DTOs.Ticket_DTOs
         public string TenantName { get; set; }
         public string? VendorId { get; set; }
         public string? VendorName { get; set; }
+        public string? TenantPhone { get; set; }
         public Guid CompanyId { get; set; }
         public List<string> ImageUrls { get; set; }
     }

@@ -12,5 +12,6 @@ namespace Tamkeen.Domain.Entities
 
         // الـ Feedbacks اللي اتقيّم فيها كـ Vendor
         public ICollection<Feedback> VendorFeedbacks { get; set; }
+        public ICollection<TicketApplication> Applications { get; set; }
     }
 }

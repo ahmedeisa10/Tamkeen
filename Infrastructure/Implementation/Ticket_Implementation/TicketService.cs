@@ -66,15 +66,13 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
 
             return _mapper.Map<TicketResponseDto>(ticket);
         }
-
-        public async Task<IEnumerable<TicketResponseDto>> GetPendingAsync(string? governorate = null,string? city = null)
+        public async Task<IEnumerable<TicketResponseDto>> GetPendingAsync(
+            string? governorate = null, string? city = null)
         {
-            // [ADD] كل الطلبات اللي مش assigned لفني بعد (Pending أو أي حالة بدون vendor)
             var query = _context.Tickets
                 .Include(t => t.Tenant)
-                .Include(t => t.Vendor)
                 .Include(t => t.Images)
-                .Where(t=>t.Status==RequestStatus.Pending)
+                .Where(t => t.Status == RequestStatus.Pending && t.VendorId == null)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(governorate))
@@ -84,11 +82,73 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
                 query = query.Where(t => t.City == city);
 
             var tickets = await query
+                .OrderByDescending(t => t.CreatedAt)
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<TicketResponseDto>>(tickets);
         }
 
+        // فيندور يقدم على تيكيت
+        public async Task ApplyAsync(Guid ticketId, string vendorId)
+        {
+            var ticket = await _context.Tickets
+                .FirstOrDefaultAsync(t => t.Id == ticketId)
+                ?? throw new NotFoundException("Ticket not found");
+
+            if (ticket.Status != RequestStatus.Pending)
+                throw new BadRequestException("التيكيت دي مش متاحة للتقديم");
+
+            if (ticket.VendorId != null)
+                throw new BadRequestException("التيكيت دي اتكلفت بالفعل");
+
+            var alreadyApplied = await _context.TicketApplications
+                .AnyAsync(a => a.TicketId == ticketId && a.VendorId == vendorId);
+
+            if (alreadyApplied)
+                throw new BadRequestException("قدمت على التيكيت دي قبل كده");
+
+            var application = new TicketApplication
+            {
+                Id = Guid.NewGuid(),
+                TicketId = ticketId,
+                VendorId = vendorId,
+                AppliedAt = DateTime.UtcNow
+            };
+
+            await _context.TicketApplications.AddAsync(application);
+            await _context.SaveChangesAsync();
+        }
+        // Tenant يقبل فيندور معين → يمسح باقي الـ applications
+        public async Task AcceptApplicationAsync(Guid applicationId, string tenantId)
+        {
+            var application = await _context.TicketApplications
+                .Include(a => a.Ticket)
+                .Include(a => a.Vendor)
+                .FirstOrDefaultAsync(a => a.Id == applicationId)
+                ?? throw new NotFoundException("Application not found");
+
+            if (application.Ticket.TenantId != tenantId)
+                throw new ForbiddenException("Access denied");
+
+            if (application.Ticket.Status != RequestStatus.Pending)
+                throw new BadRequestException("التيكيت دي اتكلفت بالفعل");
+
+            // ── ظبط التيكيت ──
+            application.Ticket.VendorId = application.VendorId;
+            application.Ticket.Status = RequestStatus.Assigned;
+
+            // ── امسح كل الـ applications التانية على نفس التيكيت ──
+            var otherApplications = await _context.TicketApplications
+                .Where(a => a.TicketId == application.TicketId && a.Id != applicationId)
+                .ToListAsync();
+
+            _context.TicketApplications.RemoveRange(otherApplications);
+
+            // ── امسح الـ application المقبولة برضه ──
+            //_context.TicketApplications.Remove(application);
+
+            await _context.SaveChangesAsync();
+        }
         public async Task<TicketResponseDto> GetByIdAsync(Guid id, string userId, string role)
         {
             var ticket = await _context.Tickets
@@ -139,30 +199,29 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
         }
 
 
-        //public async Task AssignVendorAsync(Guid id, AssignTicketDto dto)
-        //{
-        //    var ticket = await _context.Tickets.FindAsync(id)
-        //        ?? throw new NotFoundException("Ticket not found");
-
-        //    if (ticket.Status != RequestStatus.Pending)
-        //        throw new BadRequestException("Only pending tickets can be assigned");
-
-        //    ticket.VendorId = dto.VendorId;
-        //    ticket.Status = RequestStatus.Assigned;
-        //    await _context.SaveChangesAsync();
-        //}
-
-        public async Task AcceptAsync(Guid id, string vendorId)
+        public async Task VendorApplayingAsync(Guid id, AssignTicketDto dto)
         {
             var ticket = await _context.Tickets.FindAsync(id)
                 ?? throw new NotFoundException("Ticket not found");
 
             if (ticket.Status != RequestStatus.Pending)
-                throw new BadRequestException("Ticket must be assigned first");
-            ticket.VendorId = vendorId;
-            ticket.Status = RequestStatus.InProgress;
+                throw new BadRequestException("Only pending tickets can be assigned");
+            ticket.VendorId = dto.VendorId;
+            ticket.Status = RequestStatus.Assigned;
             await _context.SaveChangesAsync();
         }
+
+        //public async Task AcceptAsync(Guid id, string vendorId)
+        //{
+        //    var ticket = await _context.Tickets.FindAsync(id)
+        //        ?? throw new NotFoundException("Ticket not found");
+
+        //    if (ticket.Status != RequestStatus.Pending)
+        //        throw new BadRequestException("Ticket must be assigned first");
+        //    ticket.VendorId = vendorId;
+        //    ticket.Status = RequestStatus.InProgress;
+        //    await _context.SaveChangesAsync();
+        //}
 
         //public async Task RejectAsync(Guid id, string vendorId)
         //{

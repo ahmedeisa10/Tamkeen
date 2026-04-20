@@ -9,7 +9,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Tamkeen.Application.Interfaces;
 using Tamkeen.Application.Interfaces.Auth;
+using Tamkeen.Application.Interfaces.Feedback;
 using Tamkeen.Application.Interfaces.Ticket_Interface;
+using Tamkeen.Application.Interfaces.Vendor;
 using Tamkeen.Domain.Entities;
 using Tamkeen.Infrastructure.Data;
 using Tamkeen.Infrastructure.Implementation;
@@ -82,7 +84,9 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITicketService, TicketService>();
         services.AddScoped<IImageService, ImageService>();
+        services.AddScoped<ITicketApplicationService, TicketApplicationService>();
         services.AddScoped<IVendorService, VendorService>();
+        services.AddScoped<IFeedbackService, FeedbackService>();
         services.AddScoped<IInvitationService, InvitationService>();
 
         return services;

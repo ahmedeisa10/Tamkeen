@@ -21,6 +21,10 @@ namespace Tamkeen.Infrastructure.Data.EntityTypeConfiguration
                 .WithMany(u => u.VendorFeedbacks)
                 .HasForeignKey(f => f.VendorId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(f => f.Ticket)
+                  .WithMany(t => t.Feedbacks)
+                  .HasForeignKey(f => f.TicketId)
+                  .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

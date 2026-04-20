@@ -9,6 +9,7 @@ namespace Tamkeen.Infrastructure.Data
 
         public DbSet<Company> Companies { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<TicketApplication> TicketApplications { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<SparePartRequest> SparePartRequests { get; set; }

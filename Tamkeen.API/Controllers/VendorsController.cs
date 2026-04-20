@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tamkeen.Application.DTOs;
 using Tamkeen.Application.Interfaces;
+using Tamkeen.Application.Interfaces.Vendor;
+using Tamkeen.Infrastructure.Services;
 
 namespace Tamkeen.API.Controllers
 {
@@ -32,6 +34,12 @@ namespace Tamkeen.API.Controllers
         {
             var vendors = await _service.GetAllVendorsAsync();
             return Ok(vendors);
+        }
+        [HttpGet("{vendorId}/profile")]
+        public async Task<IActionResult> GetProfile(string vendorId)
+        {
+            var profile = await _service.GetVendorProfileAsync(vendorId);
+            return Ok(profile);
         }
     }
 }
