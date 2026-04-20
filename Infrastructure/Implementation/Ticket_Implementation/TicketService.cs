@@ -135,7 +135,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
 
             // ── ظبط التيكيت ──
             application.Ticket.VendorId = application.VendorId;
-            application.Ticket.Status = RequestStatus.Assigned;
+            application.Ticket.Status = RequestStatus.vendorAccepted;
 
             // ── امسح كل الـ applications التانية على نفس التيكيت ──
             var otherApplications = await _context.TicketApplications
@@ -198,18 +198,18 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             return _mapper.Map<IEnumerable<TicketResponseDto>>(tickets);
         }
 
+        #region old methods without applications
+        //public async Task VendorApplayingAsync(Guid id, AssignTicketDto dto)
+        //{
+        //    var ticket = await _context.Tickets.FindAsync(id)
+        //        ?? throw new NotFoundException("Ticket not found");
 
-        public async Task VendorApplayingAsync(Guid id, AssignTicketDto dto)
-        {
-            var ticket = await _context.Tickets.FindAsync(id)
-                ?? throw new NotFoundException("Ticket not found");
-
-            if (ticket.Status != RequestStatus.Pending)
-                throw new BadRequestException("Only pending tickets can be assigned");
-            ticket.VendorId = dto.VendorId;
-            ticket.Status = RequestStatus.Assigned;
-            await _context.SaveChangesAsync();
-        }
+        //    if (ticket.Status != RequestStatus.Pending)
+        //        throw new BadRequestException("Only pending tickets can be assigned");
+        //    ticket.VendorId = dto.VendorId;
+        //    //ticket.Status = RequestStatus.Assigned;
+        //    await _context.SaveChangesAsync();
+        //}
 
         //public async Task AcceptAsync(Guid id, string vendorId)
         //{
@@ -239,7 +239,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
         //    ticket.VendorId = null;
         //    await _context.SaveChangesAsync();
         //}
-
+        #endregion
         public async Task CompleteAsync(Guid id, string vendorId)
         {
             var ticket = await _context.Tickets.FindAsync(id)
@@ -248,7 +248,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             if (ticket.VendorId != vendorId)
                 throw new ForbiddenException("Not your ticket");
 
-            if (ticket.Status != RequestStatus.InProgress)
+            if (ticket.Status != RequestStatus.vendorAccepted)
                 throw new BadRequestException("Ticket must be in progress first");
 
             ticket.Status = RequestStatus.Resolved;
