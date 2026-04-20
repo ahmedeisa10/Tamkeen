@@ -21,9 +21,9 @@ namespace Tamkeen.Infrastructure.Services
             if (ticket.TenantId != tenantId)
                 throw new ForbiddenException("Access denied");
 
-            if (ticket.Status == RequestStatus.Pending)
-                throw new BadRequestException("مينفعش تكتب فيدباك على تيكيت لسه في الانتظار");
-
+            if (ticket.Status != RequestStatus.Closed)
+                throw new BadRequestException("مينفعش تكتب فيدباك غير بعد إنجاز التيكيت");
+            
             var feedback = new Feedback
             {
                 Id = Guid.NewGuid(),
