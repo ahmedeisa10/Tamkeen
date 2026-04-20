@@ -9,8 +9,8 @@ namespace Tamkeen.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class TicketApplicationController(ITicketApplicationService _service) : ControllerBase
-    {
-        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    {   
+        private string GetUserId() => User.FindFirstValue("sub")!;
 
         // GET /api/TicketApplications/{ticketId}
         [HttpGet("{ticketId}")]
