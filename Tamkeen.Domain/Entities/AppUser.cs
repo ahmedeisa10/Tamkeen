@@ -4,6 +4,8 @@ namespace Tamkeen.Domain.Entities
     public class AppUser : IdentityUser
     {
         public string FullName { get; set; }
+        public string? ImageUrl { get; set; } // جديد
+
         public string? EmailConfirmationCode { get; set; }
         public DateTime? CodeExpiry { get; set; }
 
