@@ -10,6 +10,6 @@ namespace Tamkeen.Application.Interfaces
     public interface IInvitationService
     {
         Task<string> CreateInvitationAsync(string phone);
-        Task<(bool Success, string Message, string? Token)> RegisterVendorAsync(VendorRegisterDto dto);
+        Task<(bool Success, string Message, string? Token, string? ProfileImageUrl)> RegisterVendorAsync(VendorRegisterDto dto);
     }
 }

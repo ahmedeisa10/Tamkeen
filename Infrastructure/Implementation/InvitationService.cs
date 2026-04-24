@@ -63,68 +63,64 @@ namespace Tamkeen.Infrastructure.Implementation
             return whatsappLink;
         }
 
-        public async Task<(bool Success, string Message, string? Token)> RegisterVendorAsync(VendorRegisterDto dto)
+        public async Task<(bool Success, string Message, string? Token, string? ProfileImageUrl)> RegisterVendorAsync(VendorRegisterDto dto)
         {
             // ✅ 1. تحقق من اللينك
             var invitation = await _context.vendorInvitations
                 .FirstOrDefaultAsync(x => x.Token == dto.Token);
 
             if (invitation == null)
-                return (false, "Invalid invitation link.", null);
+                return (false, "Invalid invitation link.", null, null);
 
             if (invitation.IsUsed)
-                return (false, "This invitation has already been used.", null);
+                return (false, "This invitation has already been used.", null, null);
 
             if (invitation.ExpiresAt < DateTime.UtcNow)
-                return (false, "Invitation link has expired.", null);
+                return (false, "Invitation link has expired.", null, null);
 
             // ✅ 2. تحقق من الإيميل
             var existing = await _userManager.FindByEmailAsync(dto.Email);
             if (existing != null)
-                return (false, "Email already exists.", null);
-
-            // ❌ مهم: الصورة إجباري
-            if (dto.Image == null || dto.Image.Length == 0)
-                return (false, "Image is required.", null);
+                return (false, "Email already exists.", null, null);
 
             // ✅ 3. Validation للصورة
-            // ✔ الحجم (2MB)
-            if (dto.Image.Length > 2 * 1024 * 1024)
-                return (false, "Image size must be less than 2MB.", null);
+            string? imagePath = null;
 
-            // ✔ الامتدادات
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
-            var extension = Path.GetExtension(dto.Image.FileName).ToLower();
-
-            if (!allowedExtensions.Contains(extension))
-                return (false, "Only JPG and PNG images are allowed.", null);
-
-            // ✔ التأكد إنه Image
-            if (!dto.Image.ContentType.StartsWith("image/"))
-                return (false, "Invalid image file.", null);
-
-            string imagePath;
-
-            try
+            if (dto.ImageUrl != null && dto.ImageUrl.Length > 0)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/vendors");
+                if (dto.ImageUrl.Length > 2 * 1024 * 1024)
+                    return (false, "Image size must be less than 2MB.", null, null);
 
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(dto.ImageUrl.FileName).ToLower();
 
-                var fileName = Guid.NewGuid().ToString() + extension;
-                var filePath = Path.Combine(uploadsFolder, fileName);
+                if (!allowedExtensions.Contains(extension))
+                    return (false, "Only JPG and PNG images are allowed.", null, null);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                if (!dto.ImageUrl.ContentType.StartsWith("image/"))
+                    return (false, "Invalid image file.", null, null);
+
+                try
                 {
-                    await dto.Image.CopyToAsync(stream);
-                }
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/vendors");
 
-                imagePath = "/images/vendors/" + fileName;
-            }
-            catch
-            {
-                return (false, "Error while uploading image.", null);
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = Guid.NewGuid().ToString() + extension;
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await dto.ImageUrl.CopyToAsync(stream);
+                    }
+
+                    imagePath = "images/vendors/" + fileName; // ✅ بدون / في الأول عشان الفرونت يضيفها
+                }
+                catch
+                {
+                    return (false, "Error while uploading image.", null, null);
+                }
             }
 
             // ✅ 4. إنشاء المستخدم
@@ -141,7 +137,7 @@ namespace Tamkeen.Infrastructure.Implementation
             var result = await _userManager.CreateAsync(user, dto.Password);
 
             if (!result.Succeeded)
-                return (false, string.Join(", ", result.Errors.Select(e => e.Description)), null);
+                return (false, string.Join(", ", result.Errors.Select(e => e.Description)), null, null);
 
             // ✅ 5. إضافة رول
             await _userManager.AddToRoleAsync(user, UserRole.Vendor.ToString());
@@ -154,7 +150,7 @@ namespace Tamkeen.Infrastructure.Implementation
             var roles = await _userManager.GetRolesAsync(user);
             var token = _tokenService.GenerateToken(user.Id, user.Email!, roles);
 
-            return (true, "Vendor registered successfully.", token);
+            return (true, "Vendor registered successfully.", token, imagePath);
         }
     }
 }

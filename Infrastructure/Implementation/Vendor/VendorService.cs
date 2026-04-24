@@ -30,6 +30,7 @@ namespace Tamkeen.Infrastructure.Services
                 VendorId = vendor.Id,
                 FullName = vendor.FullName,
                 Phone = vendor.PhoneNumber,
+                ImageUrl = vendor.ImageUrl,
                 TicketHistory = tickets.Select(t => new VendorTicketHistoryDto
                 {
                     TicketId = t.Id,
@@ -56,8 +57,10 @@ namespace Tamkeen.Infrastructure.Services
             var profile = new VendorProfile
             {
                 fullName = dto.FullName,
+                
                 phone = dto.PhoneNumber,
                 specialty = dto.Specialization,
+
                 yearsExperience = dto.YearsOfExperience,
                 bio = dto.Bio
             };

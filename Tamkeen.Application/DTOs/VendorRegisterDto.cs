@@ -16,6 +16,6 @@ namespace Tamkeen.Application.DTOs
         public string Password { get; set; }
 
         public string PhoneNumber { get; set; }   // جديد
-        public IFormFile Image { get; set; }
+        public IFormFile ImageUrl { get; set; }
     }
 }
