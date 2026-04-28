@@ -9,3 +9,12 @@ namespace Tamkeen.Application.Interfaces.Auth
         Task<(bool Success, string Message)> ResendCodeAsync(string email);
     }
 }
+// response 
+// 1. throw exception (adv: trace exception , disad:performacne)
+// 2. result object with success, message, data (if needed) ()
+// class Result<T>
+// {
+//     public bool Success { get; set; }
+//     public string Message { get; set; }
+//     public T? Data { get; set; }
+// }
