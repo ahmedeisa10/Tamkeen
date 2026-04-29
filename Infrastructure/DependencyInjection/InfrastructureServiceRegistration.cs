@@ -29,7 +29,6 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-        // ✅ AddIdentityCore بدل AddIdentity عشان متـ override شالـ JWT scheme
         services.AddIdentityCore<AppUser>(options =>
         {
             options.Password.RequiredLength = 6;
@@ -71,7 +70,7 @@ public static class DependencyInjection
 
                 ClockSkew = TimeSpan.Zero,
 
-                // 🔥 أهم تعديل
+               
                 RoleClaimType = "role",
                 NameClaimType = "sub"
             };

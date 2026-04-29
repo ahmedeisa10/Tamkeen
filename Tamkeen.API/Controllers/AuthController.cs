@@ -34,7 +34,7 @@ namespace Tamkeen.API.Controllers
             if (!result.Success)
                 return BadRequest(result.Message);
 
-            return Ok(result.Data); // ✅ رجعنا الداتا (token)
+            return Ok(result.Data); //restored the data (token)
         }
 
         [HttpPost("login")]

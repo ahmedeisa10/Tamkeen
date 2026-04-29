@@ -29,7 +29,7 @@ namespace Tamkeen.Infrastructure.Services
             if (file.Length > 5 * 1024 * 1024)
                 throw new BadRequestException("Image size must be less than 5MB");
 
-            // مثلاً: wwwroot/uploads/tickets/
+            // Ex: wwwroot/uploads/tickets/
             var folderPath = Path.Combine(_env.WebRootPath, "uploads", folder);
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
@@ -40,7 +40,7 @@ namespace Tamkeen.Infrastructure.Services
             using var stream = new FileStream(filePath, FileMode.Create);
             await file.CopyToAsync(stream);
 
-            // بترجع الـ relative URL
+            // return the relative URL
             return $"/uploads/{folder}/{fileName}";
         }
 

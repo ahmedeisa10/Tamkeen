@@ -42,7 +42,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
                 CreatedAt = DateTime.UtcNow
             };
 
-            // لو في صور يحفظهم
+            // If there are pictures, save them
             if (dto.Images != null && dto.Images.Any())
             {
 
@@ -88,7 +88,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             return _mapper.Map<IEnumerable<TicketResponseDto>>(tickets);
         }
 
-        // فيندور يقدم على تيكيت
+        //   Vendor apply for a ticket 
         public async Task ApplyAsync(Guid ticketId, string vendorId)
         {
             var ticket = await _context.Tickets
@@ -118,7 +118,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             await _context.TicketApplications.AddAsync(application);
             await _context.SaveChangesAsync();
         }
-        // Tenant يقبل فيندور معين → يمسح باقي الـ applications
+        // Tenant accepts a specific vendor → deletes the remaining applications
         public async Task AcceptApplicationAsync(Guid applicationId, string tenantId)
         {
             var application = await _context.TicketApplications
@@ -133,17 +133,17 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             if (application.Ticket.Status != RequestStatus.Pending)
                 throw new BadRequestException("التيكيت دي اتكلفت بالفعل");
 
-            // ── ظبط التيكيت ──
+            
             application.Ticket.VendorId = application.VendorId;
             application.Ticket.Status = RequestStatus.vendorAccepted;
 
-            // ── امسح كل الـ applications التانية على نفس التيكيت ──
+            // Delete all other applications on the same ticket ──
             var otherApplications = await _context.TicketApplications
                 .ToListAsync();
 
             _context.TicketApplications.RemoveRange(otherApplications);
 
-            // ── امسح الـ application المقبولة برضه ──
+            // ── Delete the accepted applications too ──
             //_context.TicketApplications.Remove(application);
 
             await _context.SaveChangesAsync();
@@ -157,15 +157,15 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
                 .FirstOrDefaultAsync(t => t.Id == id)
                 ?? throw new NotFoundException("Ticket not found");
 
-            // Manager يشوف أي ticket
+            // Manager access any ticket
             if (role == "Manager")
                 return _mapper.Map<TicketResponseDto>(ticket);
 
-            // Tenant يشوف بتاعته بس
+            // Tenant only access his tickets
             if (role == "Tenant" && ticket.TenantId != userId)
                 throw new ForbiddenException("Access denied");
 
-            // Vendor يشوف اللي assigned له بس
+            // Vendor only sees what is assigned to him
             if (role == "Vendor" && ticket.VendorId != userId)
                 throw new ForbiddenException("Access denied");
 
@@ -184,7 +184,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             {
                 "Tenant" => query.Where(t => t.TenantId == userId),
                 "Vendor" => query.Where(t => t.VendorId == userId),
-                _ => query // Manager يشوف الكل
+                _ => query // Manager see all
             };
 
             if (!string.IsNullOrWhiteSpace(governorate))
@@ -276,9 +276,9 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
                 .FirstOrDefaultAsync(t => t.Id == ticketId)
                 ?? throw new NotFoundException("Ticket not found");
 
-            // Tenant يرفع Before فقط، Vendor يرفع After فقط
+            // Tenant raises Before only, Vendor raises After only
             if (dto.Type == ImageType.Before && ticket.TenantId != userId)
-                throw new ForbiddenException("Only tenant can upload before images");
+            throw new ForbiddenException("Only tenant can upload before images");
 
             if (dto.Type == ImageType.After && ticket.VendorId != userId)
                 throw new ForbiddenException("Only vendor can upload after images");
