@@ -63,25 +63,25 @@ namespace Tamkeen.Infrastructure.Implementation
             return whatsappLink;
         }
 
-        public async Task<(bool Success, string Message, string? Token)> RegisterVendorAsync(VendorRegisterDto dto)
+        public async Task<(bool Success, string Message, string? Token, string? ProfileImageUrl)> RegisterVendorAsync(VendorRegisterDto dto)
         {
             //  1.Check The link
             var invitation = await _context.vendorInvitations
                 .FirstOrDefaultAsync(x => x.Token == dto.Token);
 
             if (invitation == null)
-                return (false, "Invalid invitation link.", null);
+                return (false, "Invalid invitation link.", null, null);
 
             if (invitation.IsUsed)
-                return (false, "This invitation has already been used.", null);
+                return (false, "This invitation has already been used.", null, null);
 
             if (invitation.ExpiresAt < DateTime.UtcNow)
-                return (false, "Invitation link has expired.", null);
+                return (false, "Invitation link has expired.", null, null);
 
             // ✅ 2. Check Email
             var existing = await _userManager.FindByEmailAsync(dto.Email);
             if (existing != null)
-                return (false, "Email already exists.", null);
+                return (false, "Email already exists.", null, null);
 
             //  Image is required
             if (dto.Image == null || dto.Image.Length == 0)
@@ -103,28 +103,30 @@ namespace Tamkeen.Infrastructure.Implementation
             if (!dto.Image.ContentType.StartsWith("image/"))
                 return (false, "Invalid image file.", null);
 
-            string imagePath;
+                if (!dto.ImageUrl.ContentType.StartsWith("image/"))
+                    return (false, "Invalid image file.", null, null);
 
-            try
-            {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/vendors");
-
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = Guid.NewGuid().ToString() + extension;
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                try
                 {
-                    await dto.Image.CopyToAsync(stream);
-                }
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/vendors");
 
-                imagePath = "/images/vendors/" + fileName;
-            }
-            catch
-            {
-                return (false, "Error while uploading image.", null);
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = Guid.NewGuid().ToString() + extension;
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await dto.ImageUrl.CopyToAsync(stream);
+                    }
+
+                    imagePath = "images/vendors/" + fileName; // ✅ بدون / في الأول عشان الفرونت يضيفها
+                }
+                catch
+                {
+                    return (false, "Error while uploading image.", null, null);
+                }
             }
 
             //  4.Create a user
@@ -141,7 +143,7 @@ namespace Tamkeen.Infrastructure.Implementation
             var result = await _userManager.CreateAsync(user, dto.Password);
 
             if (!result.Succeeded)
-                return (false, string.Join(", ", result.Errors.Select(e => e.Description)), null);
+                return (false, string.Join(", ", result.Errors.Select(e => e.Description)), null, null);
 
             //  5. Add a role
             await _userManager.AddToRoleAsync(user, UserRole.Vendor.ToString());
@@ -154,7 +156,7 @@ namespace Tamkeen.Infrastructure.Implementation
             var roles = await _userManager.GetRolesAsync(user);
             var token = _tokenService.GenerateToken(user.Id, user.Email!, roles);
 
-            return (true, "Vendor registered successfully.", token);
+            return (true, "Vendor registered successfully.", token, imagePath);
         }
     }
 }
