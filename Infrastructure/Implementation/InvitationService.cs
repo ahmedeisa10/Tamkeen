@@ -95,6 +95,9 @@ namespace Tamkeen.Infrastructure.Implementation
             if (!dto.Image.ContentType.StartsWith("image/"))
                 return (false, "Invalid image file.", null, null);
 
+            if (!dto.Image.ContentType.StartsWith("image/"))
+                return (false, "Invalid image file.", null, null);
+
             string imagePath = string.Empty;
 
             try
