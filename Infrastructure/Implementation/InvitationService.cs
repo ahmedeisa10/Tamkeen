@@ -62,10 +62,8 @@ namespace Tamkeen.Infrastructure.Implementation
 
             return whatsappLink;
         }
-
         public async Task<(bool Success, string Message, string? Token, string? ProfileImageUrl)> RegisterVendorAsync(VendorRegisterDto dto)
         {
-            //  1.Check The link
             var invitation = await _context.vendorInvitations
                 .FirstOrDefaultAsync(x => x.Token == dto.Token);
 
@@ -78,58 +76,49 @@ namespace Tamkeen.Infrastructure.Implementation
             if (invitation.ExpiresAt < DateTime.UtcNow)
                 return (false, "Invitation link has expired.", null, null);
 
-            // ✅ 2. Check Email
             var existing = await _userManager.FindByEmailAsync(dto.Email);
             if (existing != null)
                 return (false, "Email already exists.", null, null);
 
-            //  Image is required
             if (dto.Image == null || dto.Image.Length == 0)
-                return (false, "Image is required.", null);
+                return (false, "Image is required.", null, null);
 
-            //  3. Validation for image
-            // Size is 2MB
             if (dto.Image.Length > 2 * 1024 * 1024)
-                return (false, "Image size must be less than 2MB.", null);
+                return (false, "Image size must be less than 2MB.", null, null);
 
-            // ✔ extensions
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
             var extension = Path.GetExtension(dto.Image.FileName).ToLower();
 
             if (!allowedExtensions.Contains(extension))
-                return (false, "Only JPG and PNG images are allowed.", null);
+                return (false, "Only JPG and PNG images are allowed.", null, null);
 
-            //  check it is an Image
             if (!dto.Image.ContentType.StartsWith("image/"))
-                return (false, "Invalid image file.", null);
+                return (false, "Invalid image file.", null, null);
 
-                if (!dto.ImageUrl.ContentType.StartsWith("image/"))
-                    return (false, "Invalid image file.", null, null);
+            string imagePath = string.Empty;
 
-                try
+            try
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/vendors");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = Guid.NewGuid().ToString() + extension;
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/vendors");
-
-                    if (!Directory.Exists(uploadsFolder))
-                        Directory.CreateDirectory(uploadsFolder);
-
-                    var fileName = Guid.NewGuid().ToString() + extension;
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await dto.ImageUrl.CopyToAsync(stream);
-                    }
-
-                    imagePath = "images/vendors/" + fileName; // ✅ بدون / في الأول عشان الفرونت يضيفها
+                    await dto.Image.CopyToAsync(stream);
                 }
-                catch
-                {
-                    return (false, "Error while uploading image.", null, null);
-                }
+
+                imagePath = "images/vendors/" + fileName;
+            }
+            catch
+            {
+                return (false, "Error while uploading image.", null, null);
             }
 
-            //  4.Create a user
             var user = new AppUser
             {
                 UserName = dto.Email,
@@ -145,14 +134,11 @@ namespace Tamkeen.Infrastructure.Implementation
             if (!result.Succeeded)
                 return (false, string.Join(", ", result.Errors.Select(e => e.Description)), null, null);
 
-            //  5. Add a role
             await _userManager.AddToRoleAsync(user, UserRole.Vendor.ToString());
 
-            //  6. update an invitation
             invitation.IsUsed = true;
             await _context.SaveChangesAsync();
 
-            //  7. Create a token
             var roles = await _userManager.GetRolesAsync(user);
             var token = _tokenService.GenerateToken(user.Id, user.Email!, roles);
 
