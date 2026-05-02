@@ -1,11 +1,12 @@
-﻿using System;
+﻿using AutoMapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using Tamkeen.Application.DTOs.Ticket_DTOs;
 using Tamkeen.Domain.Entities;
+using Tamkeen.Domain.Enums;
 
 namespace Tamkeen.Application.Mapping
 {
@@ -27,10 +28,16 @@ namespace Tamkeen.Application.Mapping
                     opt => opt.MapFrom(src => src.Vendor != null
                         ? src.Vendor.FullName
                         : null))
-                .ForMember(dest => dest.ImageUrls,
-                    opt => opt.MapFrom(src => src.Images != null
-                        ? src.Images.Select(i => i.Url).ToList()
-                        : new List<string>()));
+                .ForMember(dest => dest.BeforeImageUrls, opt => opt.MapFrom(src =>
+        src.Images
+           .Where(i => i.Type == ImageType.Before)
+           .Select(i => i.Url)
+           .ToList()))
+    .ForMember(dest => dest.AfterImageUrls, opt => opt.MapFrom(src =>
+        src.Images
+           .Where(i => i.Type == ImageType.After)
+           .Select(i => i.Url)
+           .ToList()));
 
             // Image → ImageResponseDto
             CreateMap<Image, ImageResponseDto>()

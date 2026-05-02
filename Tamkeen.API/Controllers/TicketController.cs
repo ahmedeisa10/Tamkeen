@@ -98,13 +98,12 @@ namespace Tamkeen.API.Controllers
         //}
         #endregion
 
-        // PATCH /api/tickets/{id}/complete
-        [HttpPatch("{id}/complete")]
+        [HttpPatch("{ticketId}/complete")]
         [Authorize(Roles = "Vendor")]
-        public async Task<IActionResult> Complete(Guid id)
+        public async Task<IActionResult> Complete(Guid ticketId, [FromForm] CompleteTicketDto dto)
         {
-            await _ticketService.CompleteAsync(id, GetUserId());
-            return NoContent();
+            var images = await _ticketService.CompleteWithImagesAsync(ticketId, dto, GetUserId());
+            return Ok(new { message = "تم إنهاء المهمة بنجاح", images });
         }
 
         // PATCH /api/tickets/{id}/close
@@ -117,15 +116,7 @@ namespace Tamkeen.API.Controllers
         }
 
 
-        // POST /api/tickets/{id}/images
-        [HttpPost("{id}/images")]
-        [Authorize(Roles = "Vendor")] //Vendor upload images after job complete
-        public async Task<IActionResult> UploadImages(Guid id, [FromForm] UploadTicketImagesDto dto)
-        {
-           
-            var images = await _ticketService.UploadImagesAsync(id, dto, GetUserId());
-            return Ok(images);
-        }
+        
 
     }
 }

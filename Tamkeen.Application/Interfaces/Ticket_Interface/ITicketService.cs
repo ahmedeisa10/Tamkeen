@@ -18,11 +18,10 @@ namespace Tamkeen.Application.Interfaces.Ticket_Interface
         //Task AssignVendorAsync(Guid id, AssignTicketDto dto);         // Manager
         //Task AcceptAsync(Guid id, string vendorId);                   // Vendor قبل
         //Task RejectAsync(Guid id, string vendorId);                   // Vendor رفض
-        Task CompleteAsync(Guid id, string vendorId);                 // Vendor خلص
+        Task<List<ImageResponseDto>> CompleteWithImagesAsync(Guid ticketId, CompleteTicketDto dto, string vendorId);
         Task CloseAsync(Guid id, string tenantId);                    // Tenant تمام
 
         //Images
-        Task<List<ImageResponseDto>> UploadImagesAsync(Guid ticketId, UploadTicketImagesDto dto, string userId);
 
 
     }

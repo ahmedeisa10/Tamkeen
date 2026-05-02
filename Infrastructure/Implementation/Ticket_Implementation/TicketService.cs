@@ -239,19 +239,45 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
         //    await _context.SaveChangesAsync();
         //}
         #endregion
-        public async Task CompleteAsync(Guid id, string vendorId)
+        public async Task<List<ImageResponseDto>> CompleteWithImagesAsync(
+            Guid ticketId, CompleteTicketDto dto, string vendorId)
         {
-            var ticket = await _context.Tickets.FindAsync(id)
+            var ticket = await _context.Tickets
+                .Include(t => t.Images)
+                .FirstOrDefaultAsync(t => t.Id == ticketId)
                 ?? throw new NotFoundException("Ticket not found");
 
             if (ticket.VendorId != vendorId)
                 throw new ForbiddenException("Not your ticket");
 
             if (ticket.Status != RequestStatus.vendorAccepted)
-                throw new BadRequestException("Ticket must be in progress first");
+                throw new BadRequestException("التيكيت لازم تكون جارٍ تنفيذها الأول");
 
+            if (dto.Images == null || !dto.Images.Any())
+                throw new BadRequestException("لازم ترفع صورة واحدة على الأقل قبل الإنهاء");
+
+            // ── رفع صور After ──
+            var savedImages = new List<Image>();
+            foreach (var file in dto.Images)
+            {
+                var url = await imageService.SaveImageAsync(file, "tickets");
+                savedImages.Add(new Image
+                {
+                    Id = Guid.NewGuid(),
+                    Url = url,
+                    Type = ImageType.After,
+                    TicketId = ticketId
+                });
+            }
+
+            await _context.Images.AddRangeAsync(savedImages);
+
+            // ── تغيير الـ Status لـ Resolved ──
             ticket.Status = RequestStatus.Resolved;
+
             await _context.SaveChangesAsync();
+
+            return _mapper.Map<List<ImageResponseDto>>(savedImages);
         }
 
         public async Task CloseAsync(Guid id, string tenantId)
@@ -269,42 +295,6 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<ImageResponseDto>> UploadImagesAsync(Guid ticketId, UploadTicketImagesDto dto, string userId)
-        {
-            var ticket = await _context.Tickets
-                .Include(t => t.Images)
-                .FirstOrDefaultAsync(t => t.Id == ticketId)
-                ?? throw new NotFoundException("Ticket not found");
-
-            // Tenant يرفع Before فقط، Vendor يرفع After فقط
-            if (dto.Type == ImageType.Before && ticket.TenantId != userId)
-                throw new ForbiddenException("Only tenant can upload before images");
-
-            if (dto.Type == ImageType.After && ticket.VendorId != userId)
-                throw new ForbiddenException("Only vendor can upload after images");
-
-            var savedImages = new List<Image>();
-
-            foreach (var file in dto.Images)
-            {
-                var url = await imageService.SaveImageAsync(file, "tickets");
-
-                var image = new Image
-                {
-                    Id = Guid.NewGuid(),
-                    Url = url,
-                    Type = dto.Type,
-                    TicketId = ticketId
-                };
-
-                savedImages.Add(image);
-            }
-
-            await _context.Images.AddRangeAsync(savedImages);
-            await _context.SaveChangesAsync();
-
-            return _mapper.Map<List<ImageResponseDto>>(savedImages);
-        }
 
         
     }
