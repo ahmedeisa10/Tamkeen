@@ -30,7 +30,7 @@ namespace Tamkeen.Infrastructure.Implementation
             _context = context;
         }
 
-        // ===== المانجر بيعمل Invitation =====
+        // ===== Manager make Invitation =====
         public async Task<string> CreateInvitationAsync(string phone)
         {
             var token = Guid.NewGuid().ToString("N");
@@ -45,19 +45,19 @@ namespace Tamkeen.Infrastructure.Implementation
             _context.vendorInvitations.Add(invitation);
             await _context.SaveChangesAsync();
 
-            // لينك التسجيل
+            // Registration Link
             var registrationLink = $"http://localhost:4200/vendor-register?token={token}";
 
-            // رسالة واتساب جميلة
+            // Whatsapp Message
             var message = $"🎉 مبارك انضمامك لينا!\n\n" +
                           $"أهلاً بيك في فريقنا 👋\n" +
                           $"يسعدنا وجودك معانا 💙\n\n" +
                           $"سجل من هنا 👇\n{registrationLink}";
 
-            // encode الرسالة
+            // encoding message
             var encodedText = Uri.EscapeDataString(message);
 
-            // لينك واتساب
+            // whatsapp Link
             var whatsappLink = $"https://wa.me/{phone}?text={encodedText}";
 
             return whatsappLink;
@@ -65,7 +65,7 @@ namespace Tamkeen.Infrastructure.Implementation
 
         public async Task<(bool Success, string Message, string? Token, string? ProfileImageUrl)> RegisterVendorAsync(VendorRegisterDto dto)
         {
-            // ✅ 1. تحقق من اللينك
+            //  1.Check The link
             var invitation = await _context.vendorInvitations
                 .FirstOrDefaultAsync(x => x.Token == dto.Token);
 
@@ -78,24 +78,30 @@ namespace Tamkeen.Infrastructure.Implementation
             if (invitation.ExpiresAt < DateTime.UtcNow)
                 return (false, "Invitation link has expired.", null, null);
 
-            // ✅ 2. تحقق من الإيميل
+            // ✅ 2. Check Email
             var existing = await _userManager.FindByEmailAsync(dto.Email);
             if (existing != null)
                 return (false, "Email already exists.", null, null);
 
-            // ✅ 3. Validation للصورة
-            string? imagePath = null;
+            //  Image is required
+            if (dto.Image == null || dto.Image.Length == 0)
+                return (false, "Image is required.", null);
 
-            if (dto.ImageUrl != null && dto.ImageUrl.Length > 0)
-            {
-                if (dto.ImageUrl.Length > 2 * 1024 * 1024)
-                    return (false, "Image size must be less than 2MB.", null, null);
+            //  3. Validation for image
+            // Size is 2MB
+            if (dto.Image.Length > 2 * 1024 * 1024)
+                return (false, "Image size must be less than 2MB.", null);
 
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
-                var extension = Path.GetExtension(dto.ImageUrl.FileName).ToLower();
+            // ✔ extensions
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var extension = Path.GetExtension(dto.Image.FileName).ToLower();
 
-                if (!allowedExtensions.Contains(extension))
-                    return (false, "Only JPG and PNG images are allowed.", null, null);
+            if (!allowedExtensions.Contains(extension))
+                return (false, "Only JPG and PNG images are allowed.", null);
+
+            //  check it is an Image
+            if (!dto.Image.ContentType.StartsWith("image/"))
+                return (false, "Invalid image file.", null);
 
                 if (!dto.ImageUrl.ContentType.StartsWith("image/"))
                     return (false, "Invalid image file.", null, null);
@@ -123,7 +129,7 @@ namespace Tamkeen.Infrastructure.Implementation
                 }
             }
 
-            // ✅ 4. إنشاء المستخدم
+            //  4.Create a user
             var user = new AppUser
             {
                 UserName = dto.Email,
@@ -139,14 +145,14 @@ namespace Tamkeen.Infrastructure.Implementation
             if (!result.Succeeded)
                 return (false, string.Join(", ", result.Errors.Select(e => e.Description)), null, null);
 
-            // ✅ 5. إضافة رول
+            //  5. Add a role
             await _userManager.AddToRoleAsync(user, UserRole.Vendor.ToString());
 
-            // ✅ 6. تحديث الدعوة
+            //  6. update an invitation
             invitation.IsUsed = true;
             await _context.SaveChangesAsync();
 
-            // ✅ 7. إنشاء التوكن
+            //  7. Create a token
             var roles = await _userManager.GetRolesAsync(user);
             var token = _tokenService.GenerateToken(user.Id, user.Email!, roles);
 

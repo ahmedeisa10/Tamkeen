@@ -63,7 +63,7 @@ namespace Tamkeen.Infrastructure.Implementation.Auth
             if (user == null || user.EmailConfirmed)
                 return (false, null, "Invalid code.");
 
-            // ✅ verify بدل hash compare
+            // ✅ verify instead of hash compare
             var isValid = ConfirmationCodeHasher.Verify(dto.Code, user.EmailConfirmationCode);
 
             if (!isValid)

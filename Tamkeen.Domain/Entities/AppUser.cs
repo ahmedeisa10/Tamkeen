@@ -4,15 +4,15 @@ namespace Tamkeen.Domain.Entities
     public class AppUser : IdentityUser
     {
         public string FullName { get; set; }
-        public string? ImageUrl { get; set; } // جديد
+        public string? ImageUrl { get; set; } 
 
         public string? EmailConfirmationCode { get; set; }
         public DateTime? CodeExpiry { get; set; }
 
-        // الـ Feedbacks اللي كتبها كـ Tenant
+        // The feedback written by Tenant
         public ICollection<Feedback> TenantFeedbacks { get; set; }
 
-        // الـ Feedbacks اللي اتقيّم فيها كـ Vendor
+        // The feedback written for Vendor
         public ICollection<Feedback> VendorFeedbacks { get; set; }
         public ICollection<TicketApplication> Applications { get; set; }
     }

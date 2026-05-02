@@ -7,15 +7,15 @@ using Microsoft.AspNetCore.Http;
 
 namespace Tamkeen.Application.DTOs
 {
-    // الـ Vendor بيملا الفورم
+// The vendor fills out the form
     public class VendorRegisterDto
     {
-        public string Token { get; set; }   // جاي من الـ URL
+        public string Token { get; set; }   // comes from the URL
         public string FullName { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
 
-        public string PhoneNumber { get; set; }   // جديد
-        public IFormFile ImageUrl { get; set; }
+        public string PhoneNumber { get; set; }   
+        public IFormFile Image { get; set; }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tamkeen.Application.DTOs
 {
-    // المانجر بيبعت رقم الواتس بس
+    // The manager will send the WhatsApp number only
     public class CreateInvitationDto
     {
         public string Phone { get; set; }

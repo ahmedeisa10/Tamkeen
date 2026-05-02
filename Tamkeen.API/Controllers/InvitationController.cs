@@ -28,10 +28,10 @@ namespace Tamkeen.API.Controllers
         {
             var link = await _invitationService.CreateInvitationAsync(dto.Phone);
             return Ok(new { link });
-            // المانجر هياخد اللينك ده ويبعته على الواتس
+            // The manager take this link and send it via WhatsApp
         }
 
-        // ===== التحقق من التوكن قبل ما يفتح الفورم =====
+        // ===== Verify the token before opening the form =====
         [HttpGet("validate/{token}")]
         public async Task<IActionResult> ValidateToken(string token)
         {
@@ -44,6 +44,7 @@ namespace Tamkeen.API.Controllers
             return Ok(new { valid = true });
         }
 
+        // =====  Vendor registers =====
         [HttpPost("register-vendor")]
         public async Task<IActionResult> RegisterVendor([FromForm] VendorRegisterDto dto)
         {
