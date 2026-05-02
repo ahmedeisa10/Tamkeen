@@ -133,7 +133,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             if (application.Ticket.Status != RequestStatus.Pending)
                 throw new BadRequestException("التيكيت دي اتكلفت بالفعل");
 
-            
+
             application.Ticket.VendorId = application.VendorId;
             application.Ticket.Status = RequestStatus.vendorAccepted;
 
@@ -172,7 +172,7 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
             return _mapper.Map<TicketResponseDto>(ticket);
         }
 
-        public async Task<IEnumerable<TicketResponseDto>> GetAllAsync(string userId, string role,string? governorate = null,string? city = null)
+        public async Task<IEnumerable<TicketResponseDto>> GetAllAsync(string userId, string role, string? governorate = null, string? city = null)
         {
             var query = _context.Tickets
                 .Include(t => t.Tenant)
@@ -293,41 +293,9 @@ namespace Tamkeen.Infrastructure.Implementation.Ticket_Implementation
 
             ticket.Status = RequestStatus.Closed;
             await _context.SaveChangesAsync();
-        }
-
-        public async Task<List<ImageResponseDto>> UploadImagesAsync(Guid ticketId, UploadTicketImagesDto dto, string userId)
-        {
-            var ticket = await _context.Tickets
-                .Include(t => t.Images)
-                .FirstOrDefaultAsync(t => t.Id == ticketId)
-                ?? throw new NotFoundException("Ticket not found");
-
-            // Tenant يرفع Before فقط، Vendor يرفع After فقط
-            if (dto.Type == ImageType.Before && ticket.TenantId != userId)
-                throw new ForbiddenException("Only tenant can upload before images");
-
-            if (dto.Type == ImageType.After && ticket.VendorId != userId)
-                throw new ForbiddenException("Only vendor can upload after images");
-
-            var savedImages = new List<Image>();
-
-            foreach (var file in dto.Images)
-            {
-                var url = await imageService.SaveImageAsync(file, "tickets");
-
-                var image = new Image
-                {
-                    Id = Guid.NewGuid(),
-                    Url = url,
-                    Type = dto.Type,
-                    TicketId = ticketId
-                };
-
-                savedImages.Add(image);
-            }
-
-
         
+
+        }
     }
 
 }
